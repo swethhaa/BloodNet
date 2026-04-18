@@ -4,16 +4,21 @@
     <title>Hospitals</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-danger">
-    <div class="container">
-        <span class="navbar-brand">Blood Bank</span>
-        <div>
-            <a href="/" class="text-white me-3">Donors</a>
-            <a href="/bloodstock" class="text-white me-3">Stock</a>
-            <a href="/hospitals" class="text-white me-3">Hospitals</a>
-            <a href="/requests" class="text-white">Requests</a>
+<nav class="navbar navbar-dark bg-danger shadow-sm py-3 mb-4 border-bottom border-4 border-danger border-opacity-75">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="/dashboard" class="navbar-brand fw-bold fs-4 mb-0 text-decoration-none">
+            Blood Bank System
+        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/dashboard" class="btn btn-outline-light border-0 px-3 fw-semibold">Dashboard</a>
+            <a href="/donors" class="btn btn-outline-light border-0 px-3 fw-semibold">Donors</a>
+            <a href="/bloodstock" class="btn btn-outline-light border-0 px-3 fw-semibold">Stock</a>
+            <a href="/hospitals" class="btn btn-outline-light border-0 px-3 fw-semibold">Hospitals</a>
+            <a href="/requests" class="btn btn-outline-light border-0 px-3 fw-semibold">Requests</a>
+            <a href="/logout" class="btn btn-outline-light border-0 px-3 fw-semibold text-warning">Logout</a>
         </div>
     </div>
 </nav>
@@ -21,20 +26,22 @@
 <div class="container mt-4">
 
     <div class="d-flex justify-content-between">
-        <h3>Hospital List</h3>
+        <h3>Hospitals</h3>
         <a href="/add_hospital" class="btn btn-success">Add Hospital</a>
     </div>
 
-    <table class="table table-bordered mt-3 shadow">
+    <table class="table table-bordered mt-3">
         <tr>
             <th>ID</th>
             <th>Hospital Name</th>
+            <th>Username</th>
         </tr>
 
         {% for h in hospitals %}
         <tr>
             <td>{{ h[0] }}</td>
             <td>{{ h[1] }}</td>
+            <td><span class="badge bg-secondary">{{ h[2] if h|length > 2 else 'N/A' }}</span></td>
         </tr>
         {% endfor %}
     </table>

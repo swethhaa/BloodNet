@@ -4,26 +4,60 @@
     <title>Add Donor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-danger">
-    <div class="container">
-        <span class="navbar-brand">Blood Bank</span>
+<nav class="navbar navbar-dark bg-danger shadow-sm py-3 mb-4 border-bottom border-4 border-danger border-opacity-75">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="/dashboard" class="navbar-brand fw-bold fs-4 mb-0 text-decoration-none">
+            Blood Bank System
+        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/dashboard" class="btn btn-outline-light border-0 px-3 fw-semibold">Dashboard</a>
+            <a href="/donors" class="btn btn-outline-light border-0 px-3 fw-semibold">Donors</a>
+            <a href="/bloodstock" class="btn btn-outline-light border-0 px-3 fw-semibold">Stock</a>
+            <a href="/hospitals" class="btn btn-outline-light border-0 px-3 fw-semibold">Hospitals</a>
+            <a href="/requests" class="btn btn-outline-light border-0 px-3 fw-semibold">Requests</a>
+            <a href="/logout" class="btn btn-outline-light border-0 px-3 fw-semibold text-warning">Logout</a>
+        </div>
     </div>
 </nav>
 
 <div class="container mt-5">
-    <div class="card p-4 shadow">
-        <h3>Add Donor</h3>
+
+    <div class="card shadow p-4">
+        <h3 class="mb-3">Add New Donor</h3>
+
         <form method="POST">
-            <input type="text" name="name" class="form-control mb-3" placeholder="Name">
-            <input type="number" name="age" class="form-control mb-3" placeholder="Age">
-            <input type="text" name="gender" class="form-control mb-3" placeholder="Gender">
-            <input type="text" name="bloodgroup" class="form-control mb-3" placeholder="Blood Group">
+            <input type="text" name="name" class="form-control mb-3" placeholder="Full Name" required>
+            <input type="number" name="age" class="form-control mb-3" placeholder="Age" required>
+            <input type="number" name="units" class="form-control mb-3" placeholder="Units Donated" required>
+
+            <select name="gender" class="form-control mb-3" required>
+                <option value="">Select Gender</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+            </select>
+
+            <select name="bloodgroup" class="form-control mb-3" required>
+                <option value="">Select Blood Group</option>
+                <option>A+</option>
+                <option>A-</option>
+                <option>B+</option>
+                <option>B-</option>
+                <option>AB+</option>
+                <option>AB-</option>
+                <option>O+</option>
+                <option>O-</option>
+            </select>
+
             <input type="date" name="lastdonationdate" class="form-control mb-3">
-            <button class="btn btn-primary w-100">Submit</button>
+
+            <button class="btn btn-success w-100">Save Donor</button>
         </form>
     </div>
+
 </div>
 
 </body>

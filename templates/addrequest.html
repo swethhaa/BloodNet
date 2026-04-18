@@ -6,20 +6,25 @@
 </head>
 <body class="bg-light">
 
-<nav class="navbar navbar-dark bg-danger">
-    <div class="container">
-        <span class="navbar-brand">Blood Bank</span>
+<nav class="navbar navbar-dark bg-danger shadow-sm py-3 mb-4 border-bottom border-4 border-danger border-opacity-75">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a href="/dashboard" class="navbar-brand fw-bold fs-4 mb-0 text-decoration-none">
+            Blood Bank System
+        </a>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="/hospital_dashboard" class="btn btn-outline-light border-0 px-3 fw-semibold">My Requests</a>
+            <a href="/logout" class="btn btn-outline-light border-0 px-3 fw-semibold">Logout</a>
+        </div>
     </div>
 </nav>
 
 <div class="container mt-5">
     <div class="card p-4 shadow">
-        <h3>New Blood Request</h3>
+        <h3>Request Blood Units</h3>
 
         <form method="POST">
-            <input type="text" name="bloodgroup" class="form-control mb-3" placeholder="Blood Group" required>
-            <input type="number" name="units" class="form-control mb-3" placeholder="Units" required>
-            <input type="number" name="hospitalid" class="form-control mb-3" placeholder="Hospital ID" required>
+            <input type="text" name="bloodgroup" class="form-control mb-3" placeholder="Blood Group (e.g. O+)" required>
+            <input type="number" name="units" class="form-control mb-3" placeholder="Units Needed" required>
 
             <button class="btn btn-primary w-100">Submit</button>
         </form>
