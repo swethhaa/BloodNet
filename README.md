@@ -31,8 +31,9 @@ This system helps in maintaining donor records, tracking available blood units, 
 ---
 
  How to Run
-1. Clone the repository  
-2. Open project folder  
-3. Run the Flask app:
-   ```bash
-   python app.py
+1. Install Python and MySQL.
+2. Set up MySQL database 'bloodbank' with tables: donor, bloodstock, hospital, bloodrequest, donation, bloodexpiry.
+3. Install dependencies: pip install -r requirements.txt
+4. Run the Flask app: python app.py
+5. Open http://127.0.0.1:5000 in browser.
+6. Login as admin with username: admin, password: admin123

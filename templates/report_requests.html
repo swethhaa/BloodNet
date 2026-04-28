@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Hospitals</title>
+    <title>Requests Report</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
@@ -24,25 +24,37 @@
 </nav>
 
 <div class="container mt-4">
-
-    <h3>Hospitals</h3>
+    <h3>Requests Report</h3>
 
     <table class="table table-bordered mt-3">
         <tr>
             <th>ID</th>
-            <th>Hospital Name</th>
-            <th>Username</th>
+            <th>Blood Group</th>
+            <th>Units</th>
+            <th>Request Date</th>
+            <th>Status</th>
+            <th>Hospital ID</th>
         </tr>
 
-        {% for h in hospitals %}
+        {% for r in data %}
         <tr>
-            <td>{{ h[0] }}</td>
-            <td>{{ h[1] }}</td>
-            <td><span class="badge bg-secondary">{{ h[2] if h|length > 2 else 'N/A' }}</span></td>
+            <td>{{ r[0] }}</td>
+            <td>{{ r[1] }}</td>
+            <td>{{ r[2] }}</td>
+            <td>{{ r[3] }}</td>
+            <td>
+                {% if r[4] == 'Available' %}
+                    <span class="badge bg-success">Available</span>
+                {% elif r[4] == 'Not Available' %}
+                    <span class="badge bg-danger">Not Available</span>
+                {% else %}
+                    <span class="badge bg-secondary">{{ r[4] }}</span>
+                {% endif %}
+            </td>
+            <td>{{ r[5] }}</td>
         </tr>
         {% endfor %}
     </table>
-
 </div>
 
 </body>

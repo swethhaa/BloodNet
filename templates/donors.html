@@ -28,7 +28,10 @@
 
     <div class="d-flex justify-content-between">
         <h3>Donor List</h3>
-        <a href="/add" class="btn btn-success">Add Donor</a>
+        <div>
+            <a href="/add" class="btn btn-success me-2">Add Donor</a>
+            <a href="/donate" class="btn btn-primary">Record Donation</a>
+        </div>
     </div>
 
     <table class="table table-bordered mt-3">
@@ -38,19 +41,29 @@
             <th>Age</th>
             <th>Gender</th>
             <th>Blood Group</th>
-            <th>Date</th>
+            <th>Last Donation</th>
+            <th>Status</th>
             <th>Actions</th>
         </tr>
 
-        {% for d in donors %}
+        {% for donor_info in donors_with_status %}
+        {% set d = donor_info[0] %}
+        {% set status = donor_info[1] %}
+        {% set eligible = donor_info[2] %}
         <tr>
             <td>{{ loop.index }}</td>
             <td>{{ d[1] }}</td>
             <td>{{ d[2] }}</td>
             <td>{{ d[3] }}</td>
             <td>{{ d[4] }}</td>
-            <td>{{ d[5] }}</td>
-
+            <td>{{ d[5] if d[5] and d[5] != '0000-00-00' else 'Never' }}</td>
+            <td>
+                {% if eligible %}
+                <span class="badge bg-success">{{ status }}</span>
+                {% else %}
+                <span class="badge bg-warning">{{ status }}</span>
+                {% endif %}
+            </td>
             <td>
                 <a href="/edit/{{ d[0] }}" class="btn btn-warning btn-sm">Edit</a>
                 <a href="/delete/{{ d[0] }}" class="btn btn-danger btn-sm">Delete</a>

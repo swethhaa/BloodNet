@@ -23,7 +23,17 @@
         <h3>Request Blood Units</h3>
 
         <form method="POST">
-            <input type="text" name="bloodgroup" class="form-control mb-3" placeholder="Blood Group (e.g. O+)" required>
+            <select name="bloodgroup" class="form-select mb-3" required>
+                <option value="" disabled selected>Select Blood Group</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+            </select>
             <input type="number" name="units" class="form-control mb-3" placeholder="Units Needed" required>
 
             <button class="btn btn-primary w-100">Submit</button>

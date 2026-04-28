@@ -53,7 +53,17 @@
 
             <div class="mb-3">
                 <label class="form-label">Blood Group</label>
-                <input type="text" name="bloodgroup" value="{{ donor[4] }}" class="form-control" required>
+                <select name="bloodgroup" class="form-select" required>
+                    <option value="" disabled>Select Blood Group</option>
+                    <option value="A+" {% if donor[4]=='A+' %}selected{% endif %}>A+</option>
+                    <option value="A-" {% if donor[4]=='A-' %}selected{% endif %}>A-</option>
+                    <option value="B+" {% if donor[4]=='B+' %}selected{% endif %}>B+</option>
+                    <option value="B-" {% if donor[4]=='B-' %}selected{% endif %}>B-</option>
+                    <option value="AB+" {% if donor[4]=='AB+' %}selected{% endif %}>AB+</option>
+                    <option value="AB-" {% if donor[4]=='AB-' %}selected{% endif %}>AB-</option>
+                    <option value="O+" {% if donor[4]=='O+' %}selected{% endif %}>O+</option>
+                    <option value="O-" {% if donor[4]=='O-' %}selected{% endif %}>O-</option>
+                </select>
             </div>
 
             <div class="mb-3">
