@@ -9,7 +9,7 @@
 <nav class="navbar navbar-dark bg-danger shadow-sm py-3 mb-4 border-bottom border-4 border-danger border-opacity-75">
     <div class="container d-flex justify-content-between align-items-center">
         <a href="/hospital_dashboard" class="navbar-brand fw-bold fs-4 mb-0 text-decoration-none">
-            Blood Bank System
+            BloodNet
         </a>
         <div class="d-flex gap-2 flex-wrap">
             <span class="text-white py-2 me-3">Welcome, {{ session['hospitalname'] }}</span>
@@ -31,7 +31,7 @@
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Req #</th>
+                        <th class="ps-4">Req ID</th>
                         <th>Blood Group</th>
                         <th>Units</th>
                         <th>Status</th>
@@ -40,7 +40,7 @@
                 <tbody>
                     {% for r in requests %}
                     <tr>
-                        <td class="ps-4">{{ loop.index }}</td>
+                        <td class="ps-4">{{ r[0] }}</td>
                         <td class="fw-bold">{{ r[1] }}</td>
                         <td>{{ r[2] }}</td>
                         <td>

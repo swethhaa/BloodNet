@@ -6,9 +6,7 @@ from flask_mysqldb import MySQL
 app = Flask(__name__)
 app.debug = True
 
-# =========================
-# MYSQL CONFIG
-# =========================
+
 app.config['MYSQL_HOST'] = '127.0.0.1'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'Swe21tha07$'
@@ -18,9 +16,7 @@ app.secret_key = 'super_secret_blood_bank_key'
 
 mysql = MySQL(app)
 
-# =========================
-# HELPER FUNCTIONS
-# =========================
+
 
 def check_eligibility(last_date):
     today = date.today()
@@ -98,7 +94,6 @@ def add_expiry(bloodgroup, units, donation_date):
     expiry_date = donation_date + timedelta(days=35)
     cur = mysql.connection.cursor()
 
-    # Update bloodstock expiry date with the latest donation's expiry date
     cur.execute("""
         UPDATE bloodstock 
         SET expirydate=%s
@@ -111,7 +106,6 @@ def add_expiry(bloodgroup, units, donation_date):
 def fulfill_pending_requests(bloodgroup):
     cur = mysql.connection.cursor()
     
-    # Get all 'Not Available' requests for this bloodgroup, ordered by oldest first
     cur.execute("""
         SELECT requestid, units 
         FROM bloodrequest 
@@ -125,12 +119,10 @@ def fulfill_pending_requests(bloodgroup):
         req_id = req[0]
         req_units = req[1]
         
-        # Check current stock
         cur.execute("SELECT unitsavailable FROM bloodstock WHERE bloodgroup=%s", (bloodgroup,))
         stock_row = cur.fetchone()
         
         if stock_row and int(stock_row[0]) >= int(req_units):
-            # Fulfill this request by deducting stock and updating status
             cur.execute("""
                 UPDATE bloodstock 
                 SET unitsavailable = unitsavailable - %s 
@@ -146,9 +138,7 @@ def fulfill_pending_requests(bloodgroup):
     mysql.connection.commit()
     cur.close()
 
-# =========================
-# AUTHENTICATION
-# =========================
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -479,69 +469,113 @@ def hospital_dashboard():
 @admin_required
 def donate():
     if request.method == 'POST':
-        donorid = request.form['donorid']
-        bloodgroup = request.form['bloodgroup']
-        units = int(request.form['units'])
-        donation_date = date.today()
+        try:
+            donorid = request.form.get('donorid')
+            bloodgroup = request.form.get('bloodgroup', '').strip().replace(" ", "").upper()
+            units = int(request.form.get('units', 1))
+            donation_date = date.today()
 
-        # Validate units (max 1 unit per donation)
-        if units > 1:
+            # Validate donor selection
+            if not donorid:
+                cur = mysql.connection.cursor()
+                cur.execute("SELECT * FROM donor")
+                donors = cur.fetchall()
+                cur.close()
+                donors_with_status = build_donors_with_status(donors)
+                return render_template('donate.html', donors_with_status=donors_with_status, error="Please select a donor.")
+
+            # Validate blood group selection
+            if not bloodgroup:
+                cur = mysql.connection.cursor()
+                cur.execute("SELECT * FROM donor")
+                donors = cur.fetchall()
+                cur.close()
+                donors_with_status = build_donors_with_status(donors)
+                return render_template('donate.html', donors_with_status=donors_with_status, error="Please select a blood group.")
+
+            # Validate units (max 1 unit per donation)
+            if units > 1 or units < 1:
+                cur = mysql.connection.cursor()
+                cur.execute("SELECT * FROM donor")
+                donors = cur.fetchall()
+                cur.close()
+                
+                donors_with_status = build_donors_with_status(donors)
+                error_msg = f"Donation Rejected: Maximum 1 unit allowed per donation. You entered {units} units."
+                return render_template('donate.html', donors_with_status=donors_with_status, error=error_msg)
+
+            # Get donor info and check 90-day rule
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT name, lastdonationdate FROM donor WHERE donorid=%s", (donorid,))
+            donor_data = cur.fetchone()
+            
+            if not donor_data:
+                cur.close()
+                cur = mysql.connection.cursor()
+                cur.execute("SELECT * FROM donor")
+                donors = cur.fetchall()
+                cur.close()
+                donors_with_status = build_donors_with_status(donors)
+                return render_template('donate.html', donors_with_status=donors_with_status, error="Invalid donor selected.")
+            
+            donor_name = donor_data[0]
+            last_date = donor_data[1]
+            
+            # Check 90-day eligibility
+            if last_date and last_date != '0000-00-00':
+                if isinstance(last_date, str):
+                    try:
+                        last_date = date.fromisoformat(last_date)
+                    except ValueError:
+                        pass
+                
+                if isinstance(last_date, date):
+                    days_since = (donation_date - last_date).days
+                    if days_since < 90:
+                        cur.close()
+                        cur = mysql.connection.cursor()
+                        cur.execute("SELECT * FROM donor")
+                        donors = cur.fetchall()
+                        cur.close()
+                        
+                        next_eligible_date = last_date + timedelta(days=90)
+                        error_msg = f"Donation Rejected: {donor_name} is not medically eligible yet. Only {days_since} days have passed since their last donation on {last_date}. They will be eligible again on {next_eligible_date} (90 days required)."
+                        donors_with_status = build_donors_with_status(donors)
+                        return render_template('donate.html', donors_with_status=donors_with_status, error=error_msg)
+
+            # Update donor's last donation date and total units
+            cur.execute("""
+                UPDATE donor 
+                SET lastdonationdate=%s, units = units + %s 
+                WHERE donorid=%s
+            """, (donation_date, units, donorid))
+
+            # Insert donation record
+            cur.execute("""
+                INSERT INTO donation(donorid, bloodgroup, unitsdonated, donationdate)
+                VALUES (%s, %s, %s, %s)
+            """, (donorid, bloodgroup, units, donation_date))
+
+            mysql.connection.commit()
+            cur.close()
+
+            # Update blood stock
+            update_stock(bloodgroup, units, "ADD")
+            add_expiry(bloodgroup, units, donation_date)
+            
+            # Try to fulfill pending requests
+            fulfill_pending_requests(bloodgroup)
+
+            return redirect(url_for('donors'))
+
+        except Exception as e:
             cur = mysql.connection.cursor()
             cur.execute("SELECT * FROM donor")
             donors = cur.fetchall()
             cur.close()
-            
             donors_with_status = build_donors_with_status(donors)
-            error_msg = f"Donation Rejected: Maximum 1 unit allowed per donation. You entered {units} units."
+            error_msg = f"Error recording donation: {str(e)}"
             return render_template('donate.html', donors_with_status=donors_with_status, error=error_msg)
-
-        # Check 90-day rule
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT name, lastdonationdate FROM donor WHERE donorid=%s", (donorid,))
-        donor_data = cur.fetchone()
-        
-        if donor_data and donor_data[1]:
-            last_date = donor_data[1]
-            # Convert string to date if necessary
-            if isinstance(last_date, str):
-                try:
-                    last_date = date.fromisoformat(last_date)
-                except ValueError:
-                    pass
-            
-            if isinstance(last_date, date):
-                days_since = (donation_date - last_date).days
-                if days_since < 90:
-                    cur.execute("SELECT * FROM donor")
-                    donors = cur.fetchall()
-                    donors_with_status = build_donors_with_status(donors)
-                    cur.close()
-                    
-                    next_eligible_date = last_date + timedelta(days=90)
-                    error_msg = f"Donation Rejected: {donor_data[0]} is not medically eligible yet. Only {days_since} days have passed since their last donation on {last_date}. They will be eligible again on {next_eligible_date} (90 days required)."
-                    return render_template('donate.html', donors_with_status=donors_with_status, error=error_msg)
-
-        # Update donor's last donation date and total units
-        cur.execute("""
-            UPDATE donor 
-            SET lastdonationdate=%s, units = units + %s 
-            WHERE donorid=%s
-        """, (donation_date, units, donorid))
-
-        cur.execute("""
-            INSERT INTO donation(donorid, bloodgroup, unitsdonated, donationdate)
-            VALUES (%s,%s,%s,%s)
-        """, (donorid, bloodgroup, units, donation_date))
-
-        mysql.connection.commit()
-        cur.close()
-
-        update_stock(bloodgroup, units, "ADD")
-        add_expiry(bloodgroup, units, donation_date)
-        
-        fulfill_pending_requests(bloodgroup)
-
-        return redirect(url_for('donors'))
 
     # GET request - show donation form
     cur = mysql.connection.cursor()
@@ -552,36 +586,6 @@ def donate():
     donors_with_status = build_donors_with_status(donors)
 
     return render_template('donate.html', donors_with_status=donors_with_status)
-
-# =========================
-# REPORTS MODULE
-# =========================
-
-@app.route('/reports/stock')
-def report_stock():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM bloodstock")
-    data = cur.fetchall()
-    cur.close()
-    return render_template('report_stock.html', data=data)
-
-
-@app.route('/reports/requests')
-def report_requests():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM bloodrequest")
-    data = cur.fetchall()
-    cur.close()
-    return render_template('report_requests.html', data=data)
-
-
-@app.route('/reports/donations')
-def report_donations():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM donation")
-    data = cur.fetchall()
-    cur.close()
-    return render_template('report_donations.html', data=data)
 
 @app.route('/dashboard')
 @admin_required
