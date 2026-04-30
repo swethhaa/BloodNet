@@ -331,10 +331,10 @@ def bloodstock():
     cur = mysql.connection.cursor()
 
     cur.execute("""
-        SELECT bloodgroup, unitsavailable 
+        SELECT stockid, bloodgroup, unitsavailable 
         FROM bloodstock 
         WHERE bloodgroup IS NOT NULL
-        ORDER BY bloodgroup
+        ORDER BY stockid
     """)
 
     data = cur.fetchall()
@@ -376,7 +376,7 @@ def requests_page():
     cur = mysql.connection.cursor()
 
     cur.execute("""
-        SELECT br.requestid, br.bloodgroupreq, br.units, br.status, h.hospitalname 
+        SELECT br.requestid, br.bloodgroupreq, br.units, br.status, h.hospitalname, br.requestdate, br.stockid
         FROM bloodrequest br
         JOIN hospital h ON br.hospitalid = h.hospitalid
     """)
@@ -400,11 +400,13 @@ def add_request():
         bloodgroup = request.form['bloodgroup'].strip().replace(" ", "").upper()
         units = int(request.form['units'])
 
-        cur.execute("SELECT unitsavailable FROM bloodstock WHERE bloodgroup=%s", (bloodgroup,))
+        cur.execute("SELECT stockid, unitsavailable FROM bloodstock WHERE bloodgroup=%s", (bloodgroup,))
         stock = cur.fetchone()
 
-        if stock is not None and int(stock[0]) >= int(units):
+        stock_id = None
+        if stock is not None and int(stock[1]) >= int(units):
             status = "Available"
+            stock_id = stock[0]
 
             cur.execute("""
                 UPDATE bloodstock 
@@ -413,11 +415,13 @@ def add_request():
             """, (units, bloodgroup))
         else:
             status = "Not Available"
+            if stock is not None:
+                stock_id = stock[0]
 
         cur.execute("""
-            INSERT INTO bloodrequest (bloodgroupreq, units, requestdate, status, hospitalid)
-            VALUES (%s, %s, CURDATE(), %s, %s)
-        """, (bloodgroup, units, status, hospitalid))
+            INSERT INTO bloodrequest (bloodgroupreq, units, requestdate, status, hospitalid, stockid)
+            VALUES (%s, %s, CURDATE(), %s, %s, %s)
+        """, (bloodgroup, units, status, hospitalid, stock_id))
 
         mysql.connection.commit()
         cur.close()
@@ -433,7 +437,7 @@ def hospital_dashboard():
         return redirect(url_for('dashboard'))
         
     cur = mysql.connection.cursor()
-    cur.execute("SELECT * FROM bloodrequest WHERE hospitalid=%s", (session['hospitalid'],))
+    cur.execute("SELECT requestid, bloodgroupreq, units, status, requestdate, stockid FROM bloodrequest WHERE hospitalid=%s", (session['hospitalid'],))
     data = cur.fetchall()
     cur.close()
     

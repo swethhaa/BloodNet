@@ -34,6 +34,8 @@
                         <th class="ps-4">Req ID</th>
                         <th>Blood Group</th>
                         <th>Units</th>
+                        <th>Stock ID</th>
+                        <th>Request Date</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -43,12 +45,14 @@
                         <td class="ps-4">{{ r[0] }}</td>
                         <td class="fw-bold">{{ r[1] }}</td>
                         <td>{{ r[2] }}</td>
+                        <td>{{ r[5] if r[5] else '-' }}</td>
+                        <td>{{ r[4] }}</td>
                         <td>
-                            {% if r[3] == 'Available' or r[4] == 'Available' %}
+                            {% if r[3] == 'Available' or r[3] == 'Available' %}
                                 <span class="badge bg-success">Available</span>
-                            {% elif r[3] == 'Not Available' or r[4] == 'Not Available' %}
+                            {% elif r[3] == 'Not Available' or r[3] == 'Not Available' %}
                                 <span class="badge bg-danger">Not Available</span>
-                            {% elif r[3] == 'Approved' or r[4] == 'Approved' %}
+                            {% elif r[3] == 'Approved' or r[3] == 'Approved' %}
                                 <span class="badge bg-success">Approved</span>
                             {% else %}
                                 <span class="badge bg-secondary">Unknown</span>
@@ -57,7 +61,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="text-center text-muted py-4">No requests found.</td>
+                        <td colspan="6" class="text-center text-muted py-4">No requests found.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

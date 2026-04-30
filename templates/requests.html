@@ -31,19 +31,23 @@
 
     <table class="table table-bordered mt-3">
         <tr>
-            <th>ID</th>
+            <th>Req ID</th>
             <th>Hospital</th>
             <th>Blood Group</th>
             <th>Units</th>
+            <th>Stock ID</th>
+            <th>Request Date</th>
             <th>Status</th>
         </tr>
 
         {% for r in requests %}
         <tr>
-            <td>{{ loop.index }}</td>
+            <td>{{ r[0] }}</td>
             <td>{{ r[4] }}</td>
             <td>{{ r[1] }}</td>
             <td>{{ r[2] }}</td>
+            <td>{{ r[6] }}</td>
+            <td>{{ r[5] }}</td>
 
             <td>
                 {% if r[3] == 'Available' or r[3] == 'Available' %}
