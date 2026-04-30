@@ -26,10 +26,29 @@
     <div class="card p-4 shadow">
         <h3>Add Hospital</h3>
 
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
         <form method="POST">
             <input type="text" name="hospitalname" class="form-control mb-3" placeholder="Hospital Name" required>
             <input type="text" name="username" class="form-control mb-3" placeholder="Login Username" required>
             <input type="password" name="password" class="form-control mb-3" placeholder="Login Password" required>
+            
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <div class="input-group">
+                    <span class="input-group-text">+91</span>
+                    <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10" required>
+                </div>
+                <small class="text-muted d-block mt-1">Enter 10-digit mobile number (Indian standard)</small>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Address</label>
+                <textarea name="address" class="form-control" placeholder="Hospital Address" rows="3" required></textarea>
+            </div>
+            
             <button class="btn btn-primary w-100">Submit</button>
         </form>
 

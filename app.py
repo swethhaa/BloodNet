@@ -35,7 +35,7 @@ def build_donors_with_status(donors_list):
     
     for donor in donors_list:
         try:
-            donorid, name, age, gender, bloodgroup, lastdate, units = donor
+            donorid, name, age, gender, bloodgroup, lastdate, units, phone = donor
         except (ValueError, TypeError):
             continue
         
@@ -183,13 +183,28 @@ def signup():
         hospitalname = request.form['hospitalname']
         username = request.form['username']
         password = request.form['password']
+        phone = request.form['phone']
+        address = request.form['address']
+        
+        # Validate phone number (must be exactly 10 digits)
+        if not phone or not phone.isdigit() or len(phone) != 10:
+            return render_template('signup.html', error='Phone number must be exactly 10 digits (Indian standard).')
+        
+        # Validate address is not empty
+        if not address or not address.strip():
+            return render_template('signup.html', error='Address is required.')
+        
+        # Store phone with +91 prefix
+        phone_with_code = f"+91{phone}"
         
         cur = mysql.connection.cursor()
         cur.execute("SELECT * FROM hospital WHERE username=%s", (username,))
         if cur.fetchone():
+            cur.close()
             return render_template('signup.html', error='Username already exists!')
             
-        cur.execute("INSERT INTO hospital(hospitalname, username, password) VALUES (%s, %s, %s)", (hospitalname, username, password))
+        cur.execute("INSERT INTO hospital(hospitalname, username, password, phone, address) VALUES (%s, %s, %s, %s, %s)", 
+                   (hospitalname, username, password, phone_with_code, address))
         mysql.connection.commit()
         cur.close()
         
@@ -234,6 +249,11 @@ def add_donor():
         bloodgroup = request.form['bloodgroup'].strip().replace(" ", "").upper()
         lastdate = request.form['lastdonationdate']
         units = int(request.form['units'])
+        phone = request.form['phone']
+        
+        # Validate phone number (must be exactly 10 digits)
+        if not phone or not phone.isdigit() or len(phone) != 10:
+            return render_template('adddonor.html', error='Phone number must be exactly 10 digits (Indian standard).')
 
         cur = mysql.connection.cursor()
         cur.execute("SELECT donorid, lastdonationdate FROM donor WHERE name=%s", (name,))
@@ -258,10 +278,13 @@ def add_donor():
             cur.close()
             return render_template('adddonor.html', error=error_msg)
 
+        # Store phone with +91 prefix
+        phone_with_code = f"+91{phone}"
+        
         cur.execute("""
-            INSERT INTO donor(name, age, gender, bloodgroup, lastdonationdate, units)
-            VALUES (%s, %s, %s, %s, %s, %s)
-        """, (name, age, gender, bloodgroup, lastdate, units))
+            INSERT INTO donor(name, age, gender, bloodgroup, lastdonationdate, units, phone)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """, (name, age, gender, bloodgroup, lastdate, units, phone_with_code))
 
         cur.execute("SELECT unitsavailable FROM bloodstock WHERE bloodgroup=%s", (bloodgroup,))
         existing = cur.fetchone()
@@ -298,12 +321,21 @@ def edit_donor(id):
         gender = request.form['gender']
         bloodgroup = request.form['bloodgroup'].replace(" ", "").upper()
         lastdate = request.form['lastdonationdate']
+        phone = request.form['phone']
+        
+        # Validate phone number (must be exactly 10 digits)
+        if not phone or not phone.isdigit() or len(phone) != 10:
+            cur.close()
+            return render_template('editdonor.html', error='Phone number must be exactly 10 digits (Indian standard).', donor=(0, name, age, gender, bloodgroup, lastdate, 0, phone))
+
+        # Store phone with +91 prefix
+        phone_with_code = f"+91{phone}"
 
         cur.execute("""
             UPDATE donor 
-            SET name=%s, age=%s, gender=%s, bloodgroup=%s, lastdonationdate=%s
+            SET name=%s, age=%s, gender=%s, bloodgroup=%s, lastdonationdate=%s, phone=%s
             WHERE donorid=%s
-        """, (name, age, gender, bloodgroup, lastdate, id))
+        """, (name, age, gender, bloodgroup, lastdate, phone_with_code, id))
 
         mysql.connection.commit()
         cur.close()
@@ -360,9 +392,23 @@ def add_hospital():
         name = request.form['hospitalname']
         username = request.form['username']
         password = request.form['password']
+        phone = request.form['phone']
+        address = request.form['address']
+        
+        # Validate phone number (must be exactly 10 digits)
+        if not phone or not phone.isdigit() or len(phone) != 10:
+            return render_template('addhospital.html', error='Phone number must be exactly 10 digits (Indian standard).')
+        
+        # Validate address is not empty
+        if not address or not address.strip():
+            return render_template('addhospital.html', error='Address is required.')
+        
+        # Store phone with +91 prefix
+        phone_with_code = f"+91{phone}"
 
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO hospital(hospitalname, username, password) VALUES (%s, %s, %s)", (name, username, password))
+        cur.execute("INSERT INTO hospital(hospitalname, username, password, phone, address) VALUES (%s, %s, %s, %s, %s)", 
+                   (name, username, password, phone_with_code, address))
         mysql.connection.commit()
         cur.close()
 

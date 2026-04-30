@@ -41,6 +41,7 @@
             <th>Age</th>
             <th>Gender</th>
             <th>Blood Group</th>
+            <th>Phone</th>
             <th>Last Donation</th>
             <th>Status</th>
             <th>Actions</th>
@@ -56,6 +57,7 @@
             <td>{{ d[2] }}</td>
             <td>{{ d[3] }}</td>
             <td>{{ d[4] }}</td>
+            <td>{% if d|length > 7 and d[7] %}{{ d[7] }}{% else %}-{% endif %}</td>
             <td>{{ d[5] if d[5] and d[5] != '0000-00-00' else 'Never' }}</td>
             <td>
                 {% if eligible %}

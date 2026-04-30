@@ -32,6 +32,8 @@
             <th>ID</th>
             <th>Hospital Name</th>
             <th>Username</th>
+            <th>Phone</th>
+            <th>Address</th>
         </tr>
 
         {% for h in hospitals %}
@@ -39,6 +41,8 @@
             <td>{{ h[0] }}</td>
             <td>{{ h[1] }}</td>
             <td><span class="badge bg-secondary">{{ h[2] if h|length > 2 else 'N/A' }}</span></td>
+            <td>{% if h|length > 4 %}{{ h[4] or '-' }}{% else %}-{% endif %}</td>
+            <td>{% if h|length > 5 %}{{ h[5] or '-' }}{% else %}-{% endif %}</td>
         </tr>
         {% endfor %}
     </table>

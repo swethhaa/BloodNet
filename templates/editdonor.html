@@ -30,6 +30,10 @@
     <div class="card shadow-lg p-4">
         <h3 class="mb-4 text-center">Edit Donor Details</h3>
 
+        {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+        {% endif %}
+
         <form method="POST">
 
             <div class="mb-3">
@@ -69,6 +73,15 @@
             <div class="mb-3">
                 <label class="form-label">Last Donation Date</label>
                 <input type="date" name="lastdonationdate" value="{{ donor[5] }}" class="form-control">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <div class="input-group">
+                    <span class="input-group-text">+91</span>
+                    <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10" value="{{ donor[7] or '' }}" required>
+                </div>
+                <small class="text-muted d-block mt-1">Enter 10-digit mobile number (Indian standard)</small>
             </div>
 
             <button class="btn btn-primary w-100">Update Donor</button>
